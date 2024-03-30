@@ -9,11 +9,22 @@ class STLViewerApp:
         self.root = root
         self.root.title("Dental STL Viewer")
         
+        # Center the main window on the screen
+        self.center_window(200, 35)  # Assuming a desired size of 800x800 for the VTK window
+        
         self.frame = tk.Frame(self.root)
         self.frame.pack(fill=tk.BOTH, expand=True)
         
         self.choose_file_btn = tk.Button(self.frame, text="Choose File", command=self.load_stl_file)
         self.choose_file_btn.pack()
+    
+    def center_window(self, width, height):
+        # Calculate position x, y to center the window
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = int((screen_width - width) / 2)
+        y = int((screen_height - height) / 2)
+        self.root.geometry(f'{width}x{height}+{x}+{y}')
 
     def load_stl_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("STL files", "*.stl")])
@@ -103,6 +114,11 @@ class STLViewerApp:
         # Create a new window for the rotation controls
         self.control_window = tk.Toplevel(self.root)
         self.control_window.title("Rotate Model")
+        
+        # Position the rotation control window at the top-right of the main window
+        x = self.root.winfo_x() + self.root.winfo_width()
+        y = self.root.winfo_y()
+        self.control_window.geometry(f'+{x}+{y}')
 
         # Button to rotate the model up (about the x-axis)
         rotate_up_btn = tk.Button(self.control_window, text="Rotate Up", command=lambda: self.rotate_model('x', -10))
