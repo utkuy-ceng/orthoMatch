@@ -16,13 +16,23 @@ class STLViewerApp:
     def load_stl_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("STL files", "*.stl")])
         if file_path:
-            # Ask the user if the STL is for an upper or lower chain
-            chain_type = simpledialog.askstring("Chain Type", "Is this an upper or lower chain? (upper/lower)")
-            if chain_type:
-                chain_type = chain_type.lower()
-                self.display_stl(file_path, chain_type)
+            # Determine the chain type based on the filename
+            if "_u" in file_path:
+                chain_type = "upper"
+            elif "_l" in file_path:
+                chain_type = "lower"
             else:
-                tk.messagebox.showerror("Error", "You must specify 'upper' or 'lower'.")
+                # Ask the user if the STL is for an upper or lower chain
+                chain_type = simpledialog.askstring("Chain Type", "Is this an upper or lower chain? (upper/lower)")
+                if chain_type:
+                    chain_type = chain_type.lower()
+                else:
+                    tk.messagebox.showerror("Error", "You must specify 'upper' or 'lower'.")
+                    return  # Exit the function if no chain type is specified
+            
+            # Display the STL file with the appropriate view
+            self.display_stl(file_path, chain_type)
+
 
     def display_stl(self, file_path, chain_type):
         # Read the STL file
