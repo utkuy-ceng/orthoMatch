@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import filedialog , simpledialog
 import vtk
+from PIL import Image, ImageTk  # Make sure to install pillow for ImageTk: pip install pillow
+
 
 class STLViewerApp:
     def __init__(self, root):
@@ -79,12 +81,6 @@ class STLViewerApp:
         camera.SetViewUp(0, -1, 0)  # Invert the up direction to view from below
         self.renderer.ResetCamera()  # Adjust the camera to see the whole model
 
-        # Initialize the render window interactor and start the rendering loop
-        self.render_window_interactor.Initialize()
-        self.render_window.Render()
-
-        # Setup the rotation buttons once the file is loaded
-        self.setup_rotation_buttons()
 
     def adjust_camera_for_top_view(self):
         camera = self.renderer.GetActiveCamera()
@@ -124,6 +120,9 @@ class STLViewerApp:
         rotate_right_btn = tk.Button(self.control_window, text="Rotate Right", command=lambda: self.rotate_model('y', -10))
         rotate_right_btn.pack(side=tk.RIGHT)
 
+        capture_btn = tk.Button(self.control_window, text="Capture", command=self.capture_view)
+        capture_btn.pack(side=tk.BOTTOM)
+
     
     def rotate_model(self, axis, angle):
         if axis == 'x':
@@ -133,6 +132,35 @@ class STLViewerApp:
         
         self.renderer.ResetCameraClippingRange()
         self.render_window.Render()
+
+    def capture_view(self):
+        # Setup the filter to capture the window
+        w2if = vtk.vtkWindowToImageFilter()
+        w2if.SetInput(self.render_window)
+        w2if.Update()
+        
+        # Setup the image writer to write the captured image to a file
+        writer = vtk.vtkPNGWriter()
+        writer.SetFileName("captured_model.png")
+        writer.SetInputConnection(w2if.GetOutputPort())
+        writer.Write()
+        
+        # Display the captured image in a new window or replace the current STL model view
+        self.display_captured_image("captured_model.png")
+
+    def display_captured_image(self, image_path):
+        # This method opens a new window to display the captured image
+            image_window = tk.Toplevel(self.root)
+            image_window.title("Captured Image")
+            
+            # Use PIL to open image and convert to PhotoImage
+            image = Image.open(image_path)
+            photo = ImageTk.PhotoImage(image)
+            
+            label = tk.Label(image_window, image=photo)
+            label.image = photo  # Keep a reference!
+            label.pack()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
